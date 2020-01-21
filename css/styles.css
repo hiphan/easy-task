@@ -40,9 +40,12 @@ body {
 
 .logo-info {
 	position: absolute;
-	top: 75%;
+	top: 60%;
 	left: 50%;
 	transform: translate(-50%, -50%);
+}
+
+.big-logo {
 }
 
 .sign-in-block {
@@ -58,7 +61,7 @@ body {
 .sign-in-prompt {
 	width: 100%;
 	position: absolute;
-	top: 25%;
+	top: 20%;
 	left: 50%;
 	transform: translate(-50%, -50%);
 }
@@ -113,6 +116,14 @@ body {
 
 .navbar .navbar-brand {
 	color: #e98074;
+	position: relative;
+}
+
+.brand-name {
+	color: black;
+	font-weight: 700;
+	position: absolute;
+	transform: translate(10%, 5%);
 }
 
 .section-header {
