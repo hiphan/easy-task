@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>		
+
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+		<!-- Bootstrap -->
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+		<!--FontAwesome -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+		<!-- jQuery -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+		<!-- jQuery validate -->
+		<script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/additional-methods.min.js"></script>
+
+		<!-- Moment JS -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.js"></script>
+
+		<!-- Custom -->
+		<link rel="stylesheet" href="css/styles.css">
+
+		<title>Easy Task</title>
+	</head>
+
+	<body>
+		<div class="sign-in-page visible-content">
+			<div class="logo-block">
+				<div class="logo-info">
+					<h1>Easy Task</h1>
+					<a><img src="#"></a>
+				</div>
+			</div>
+
+			<div class="sign-in-block">
+				<div class="sign-in-prompt">
+					<span class="sign-in-text">Sign in with</span>
+					<a href="#" class="fa fa-facebook" id="signInFacebook"></a>
+					<a href="#" class="fa fa-google" id="signInGoogle"></a>
+					<p class="sign-in-error hidden-content">Failed to sign in. Please try again.</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="content-page hidden-content">
+			<nav class="navbar" id="logoNav">
+				<a class="navbar-brand" href="#">
+					<img src="#">
+					Easy Task
+				</a>
+			</nav>
+			
+			<div class="quick-add">
+				<div class="col-sm-12 section-header" id="quickAddHead">
+					<span>Quick-add</span>
+				</div>
+				<form class="needs-validation" name="quickAddForm" id="quickAddForm" novalidate>
+					<div class="input-group input-group-sm col-sm-12 quickAddTask mb-3">
+						<div class="input-group-prepend">
+							<span class="input-group-text">New task</span>
+						</div>
+						<input type="text" class="form-control" id="tsk" name="tsk" aria-label="New task" placeholder="New task" maxlength="1000" required>
+					</div>
+
+					<div class="input-group input-group-sm col-sm-12 quickAddTime mb-3">
+						<input type="number" class="form-control" id="hrs" name="hrs" aria-label="Time (in hours)" placeholder="0" value="0" min="0">
+						<div class="input-group-append">
+							<span class="input-group-text">Hours</span>
+						</div>
+						<input type="number" class="form-control" id="mins" name="mins" aria-label="Time (in minutes)" placeholder="15" value="15" min="0" max="59">
+						<div class="input-group-append">
+							<span class="input-group-text">Minutes</span>
+						</div>
+					</div>
+
+					<div class="input-group input-group-sm col-sm-12 quickAddDue mb-3">
+						<div class="input-group-prepend">
+							<span class="input-group-text">Due by</span>
+						</div>
+						<input type="datetime-local" class="form-control" id="dueDate" name="dueDate" aria-label="Due by" placeholder="MM-DD-YYYY">
+					</div>
+
+					<div class="col-sm-12">
+						<button class="btn btn-primary col-sm-12 submit-btn" type="button">Add!</button>
+					</div>
+				</form>
+			</div>
+
+			<div class="container" id="allTaskBlock">
+				<div class="row"> 
+					<div class="col-sm-12 section-header">
+						<span>Task List. Count: </span>
+						<span class="task-count"></span>	
+						<a href="#">
+				        	<i class="fa fa-refresh refresh refresh-start" id="refreshButton"></i>
+				        </a>		
+					</div>
+				</div>
+
+				<div class="task-board">
+					<div class="btn-group category-group" role="group" aria-label="Rank Category">
+						<button type="button" class="btn btn-outline-primary category-button selected-btn" id="category-button-1" data-target="#timeList">Time to Complete</button>
+						<button type="button" class="btn btn-outline-primary category-button" id="category-button-2" data-target="#dueList">Deadline</button>
+					</div>
+
+					<div class="empty-board">
+						<p>Currently empty.</p>
+					</div>
+
+					<ol class="list-group task-list list-by-time" id="timeList"></ol>
+
+					<ol class="list-group task-list list-by-due" id="dueList" style="display:none"></ol>
+				</div>
+			</div>
+
+			<div class="container" id="userInfoBlock">
+				<div class="row">
+					<div class="col-sm-12 user-info">
+						<button class="btn btn-primary btn-sm logout-button">Log out</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script type="text/javascript" src="popup.js"></script>
+
+	</body>
+
+</html>
