@@ -292,7 +292,7 @@ $(document).ready(function() {
 		resetDisplay();
 	});
 
-	/* Delete a task */
+	/* Delete a task (and all identical tasks) */
 	$("ol.task-list").on("click", ".delete-button", function() {
 		$(this).closest(".task-item").slideUp(200, function() {
 			const taskName = $(this).find('.task-name').html();
@@ -327,8 +327,18 @@ $(document).ready(function() {
 				console.log("Deleted. New unsorted list:", currTaskList);
 			});
 
-			/* Remove this task */
+			/* Remove this task and its identical siblings */
+			$(this).siblings().each(function() {
+				console.log($(this));
+				if ($(this).find('.task-name').html() == taskName && $(this).find('.task-due').html() == taskDue && $(this).find('.task-hour').html() == taskHrs && $(this).find('.task-minute').html() == taskMins) {
+					$(this).slideUp(200, function() {
+						$(this).remove();
+					})
+				}
+			});
 			$(this).remove();
+
+			/* Reset the unselected (tab) list */
 			resetOneList();
 
 			/* Update count */
