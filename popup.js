@@ -1,10 +1,14 @@
 'use strict';
 
-let userID, currTaskList, currTaskListByTime, currTaskListByDue;
 
-function googleSignin(interactive) {
+let userID, currTaskList, currTaskListByTime, currTaskListByDue;
+let token_provider;
+let fbToken;
+
+function googleAuthorize(interactive) {
 	chrome.identity.getAuthToken({interactive: interactive}, function(token) {
 		if (!chrome.runtime.lastError) {
+			token_provider = 'google';
 			let init = {
 				method: "GET",
 				async: true,
@@ -24,11 +28,7 @@ function googleSignin(interactive) {
 					const welcomeBlk = $("<span></span>").text(`Welcome, ${userName}!`).addClass("welcome-text");
 					$('.user-info').append(welcomeBlk);
 
-					if (interactive) {
-						$('.content-page').attr('transition', 'visibility 0s, opacity 1s linear');
-					} else {
-						$('.content-page').attr('transition', 'visibility 0s, opacity 0s linear');
-					}
+					$('.content-page').attr('transition', 'visibility 0s, opacity 0s linear');
 
 					$('.content-page').removeClass('hidden-content').addClass('visible-content');
 					$('.sign-in-page').removeClass('visible-content').addClass('hidden-content'); 
@@ -37,30 +37,141 @@ function googleSignin(interactive) {
 						$('.sign-in-error').addClass('hidden-content');
 					}
 				})
-				.then(resetDisplay);	
+				.then(resetDisplay);
+				return true;
 			} else {
 				if (interactive) {
 					$('.sign-in-error').removeClass('hidden-content');
+					return false;
 				} else {
-					return;
+					return false;
 				}
 			}
 	});
 }
 
-function revokeToken() {
-	chrome.identity.getAuthToken({ interactive: false }, function(current_token) {
-		if (!chrome.runtime.lastError) {
-			chrome.identity.removeCachedAuthToken({ token: current_token }, function(){});
-			let xhr = new XMLHttpRequest();
-			xhr.open('GET', 'https://accounts.google.com/o/oauth2/revoke?token=' + current_token);
-			xhr.send();
-
-			$('.sign-in-page').removeClass('hidden-content').addClass('visible-content');
-			$('.content-page').removeClass('visible-content').addClass('hidden-content');
-			console.log('Succesfully revoked token.');
+function fetchFacebookUserInfo(access_token, callback) {
+	let xhr = new XMLHttpRequest();
+	xhr.open('GET', 'https://graph.facebook.com/me');
+	xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
+	xhr.onload = () => {
+		if (xhr.status == 200) {
+			callback(JSON.parse(xhr.response));
+		} else {
+			console.log('Failed to get user info');
 		}
-	})
+	}
+	xhr.send();
+}
+
+function updateFacebookUserInfo(response) {
+	userID = response.id;
+	const userName = response.name;
+	const welcomeBlk = $("<span></span>").text(`Welcome, ${userName}!`).addClass("welcome-text");
+	$('.user-info').append(welcomeBlk);
+
+	$('.content-page').attr('transition', 'visibility 0s, opacity 0s linear');
+
+	$('.content-page').removeClass('hidden-content').addClass('visible-content');
+	$('.sign-in-page').removeClass('visible-content').addClass('hidden-content'); 
+
+	if (!$('.sign-in-error').hasClass('hidden-content')) {
+		$('.sign-in-error').addClass('hidden-content');
+	};
+
+	resetDisplay();		// reset lists
+}
+
+function facebookAuthorize(interactive) {
+	const redirectURL = chrome.identity.getRedirectURL();
+	const clientID = "795593944273495";
+	const clientSecret = "fdbcf0c2ce5a3c7c9c1f359ab09590aa";
+	const scopes = ["openid", "email", "profile"];
+
+	let url = 'https://www.facebook.com/v5.0/dialog/oauth?client_id=' + clientID + 
+	'&reponse_type=token&access_type=online&display=popup' + 
+	'&redirect_uri=' + encodeURIComponent(redirectURL);
+
+	chrome.identity.launchWebAuthFlow({
+		interactive: interactive,
+		url: url
+	}, function(redirectedTo) {		// redirectedTo contains code
+		if (!chrome.identity.lastError) {
+			token_provider = 'facebook';
+			const queryStr = redirectedTo.replace(chrome.identity.getRedirectURL() + "?", "");
+			const urlParams = new URLSearchParams(queryStr);
+			const code = urlParams.get('code');		// code to be exchanged for token 
+
+			let xhr = new XMLHttpRequest();
+			let codeURL = 'https://graph.facebook.com/oauth/access_token?' +
+			'client_id=' + clientID + 
+			'&client_secret=' + clientSecret + 
+			'&redirect_uri=' + encodeURIComponent(redirectURL) + 
+			'&code=' + code;
+
+			xhr.open('GET', codeURL);
+			xhr.onload = (e) => {
+				let r = e.target;
+				if (r.status == 200) {
+					let response = JSON.parse(r.responseText);
+					let params = new URLSearchParams(response);
+					fbToken = params.get('access_token');
+					fetchFacebookUserInfo(fbToken, updateFacebookUserInfo);		// fetch user info and update ui
+				} else {
+					console.log('Failed to exchange for token.');
+					return;
+				}
+			}
+			xhr.send();
+		} else {
+			if (interactive) {
+				$('.sign-in-error').removeClass('hidden-content');
+			} else {
+				return;
+			}
+		};
+	});
+}
+
+function revokeToken() {
+	switch(token_provider) {
+		case 'google':
+			chrome.identity.getAuthToken({ interactive: false }, function(current_token) {
+				if (!chrome.runtime.lastError) {
+					chrome.identity.removeCachedAuthToken({ token: current_token }, function(){});
+					let xhr = new XMLHttpRequest();
+					xhr.open('GET', 'https://accounts.google.com/o/oauth2/revoke?token=' + current_token);
+					xhr.send();
+
+					$('.sign-in-page').removeClass('hidden-content').addClass('visible-content');
+					$('.content-page').removeClass('visible-content').addClass('hidden-content');
+
+					/* Set variables */
+					token_provider = '';
+					console.log('Succesfully revoked Google token.');
+				}
+			});
+			break;
+		case 'facebook': 
+			const logOutUrl = "https://www.facebook.com/logout.php?" + 
+			"next=" + encodeURIComponent(chrome.identity.getRedirectURL()) + 
+			"&access_token=" + fbToken; 
+			chrome.identity.launchWebAuthFlow({
+				interactive: false,
+				url: logOutUrl
+			}, function() {
+				$('.sign-in-page').removeClass('hidden-content').addClass('visible-content');
+				$('.content-page').removeClass('visible-content').addClass('hidden-content');
+
+				/* Set variables */ 
+				fbToken = '';
+				token_provider = '';
+				console.log('Succesfully logged out of Facebook.');
+			});
+			break;
+	};
+
+	token_provider = '';
 }
 
 function compareTime(a, b) {
@@ -164,13 +275,18 @@ function checkEmptyList() {
 $(window).on('load', function() {
 
 	/* Google sign-in button */
-	$("#signInGoogle").on("click", function() {
-		googleSignin(true);
+	$('#signInGoogle').on('click', function() {
+		googleAuthorize(true);
+	});
+
+	/* Facebook sign-in button */
+	$('#signInFacebook').on('click', function() {
+		facebookAuthorize(true);
 	});
 
 	/* Logout button */
 
-	$(".logout-button").on("click", function() {
+	$('.logout-button').on('click', function() {
 		revokeToken();
 	});
 
@@ -258,13 +374,15 @@ $(window).on('load', function() {
 			$('.empty-board').addClass('hidden-content');
 		}
 	});
-
-	googleSignin(false);
-
 });
 
 
 $(document).ready(function() {
+	/* Attempt to login with Google's or Facebook's existed token */
+	if (!googleAuthorize(false)) {
+		facebookAuthorize(false);
+	};
+
 	/* Select category to view (sorted) tasks */
 	$(".category-button[id^='category-button-']").on('click', function() {
 		const selected_id = $(this).attr('id');

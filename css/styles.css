@@ -102,6 +102,20 @@ body {
 	font-style: italic;
 }
 
+.github-link {
+	position: absolute;
+	width: 100%;
+	top: 225px;
+	left: 50%;
+	transform: translate(-50%, 0);
+	font-weight: 600;
+}
+
+.fa-github {
+	color: black;
+	font-size: 30px;
+}
+
 .content-page {
 	position: absolute;
 	height: 600px; 

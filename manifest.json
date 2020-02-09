@@ -3,14 +3,19 @@
 	"version": "1.0",
 	"manifest_version": 2,
 	
-	"description": "Chrome extension to rank user's tasks by time to finish!",
-	"permissions": ["storage", "declarativeContent", "activeTab", "identity"],
+	"description": "Chrome extension to sort user's tasks by either time or deadline to improve efficiency.",
+	"permissions": [
+		"storage", 
+		"identity",
+		"https://*.facebook.com/*"
+	],
+
 	"background": {
 		"scripts": ["background.js"],
 		"persistent": false
 	},
 
-	"page_action": {
+	"browser_action": {
 		"default_popup": "popup.html",
 		"default_icon": {
 			"16": "images/easy_task16.png",
@@ -28,7 +33,7 @@
     },
 
     "options_page": "options.html",
-    "content_security_policy": "script-src 'self' https://ajax.googleapis.com https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js https://cdn.jsdelivr.net/jquery.validation/1.16.0/additional-methods.min.js https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.js; object-src 'self'",
+    "content_security_policy": "script-src 'self' https://ajax.googleapis.com https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js https://cdn.jsdelivr.net/jquery.validation/1.16.0/additional-methods.min.js https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.js https://connect.facebook.net/en_US/sdk.js; object-src 'self'",
     "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAooL7dFiHlbbGgfcaPTidqcyA3ZgKEmXvBKi/XBkA2BT/D4cNMo5MHAFoBw1ovFQBr9gEA9UMb9EBx3TNMI4EIzwMJzZiF8D2c2Uf7maolL30B+9TtF1HBtA1AdWWFezf5SKRAk3KO9fW+Z0M7KDi/V52s3PKiY1NaY0YCIuiTw2TNxF9UqT838P0eoAaNFwEnWPRlWkJEx7RLhj3tF76/eVca+EFyjPWKkI8Qb3r8b9j8+dURiVu4oXA8i6pNBGaPSSnKeXYXRFBa0hAEodxzehMY0Ld/c931NowYf+wEfVcDpH+Ft219dVA5R5xOSrbKTNEOvERTOp9Zx2X7V/cyQIDAQAB",
     "oauth2": {
     	"client_id": "960596868250-2ach0qv92q0gk00qlatsv80h8pjflmcu.apps.googleusercontent.com",
